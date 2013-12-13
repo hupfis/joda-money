@@ -38,6 +38,8 @@ final class Ser implements Externalizable {
     static final byte MONEY = 'M';
     /** Type for CurrencyUnit. */
     static final byte CURRENCY_UNIT = 'C';  // not in use yet
+    /** Type for ExchangeRate. */
+    static final byte EXCHANGE_RATE = 'E';
 
     /** The type. */
     private byte type;
@@ -52,7 +54,7 @@ final class Ser implements Externalizable {
 
     /**
      * Constructor for package.
-     * 
+     *
      * @param type  the type
      * @param object  the object
      */
@@ -69,6 +71,7 @@ final class Ser implements Externalizable {
      * @param out  the output stream
      * @throws IOException if an error occurs
      */
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeByte(type);
         switch (type) {
@@ -85,6 +88,11 @@ final class Ser implements Externalizable {
             case CURRENCY_UNIT: {
                 CurrencyUnit obj = (CurrencyUnit) object;
                 writeCurrency(out, obj);
+                return;
+            }
+            case EXCHANGE_RATE: {
+                ExchangeRate obj = (ExchangeRate) object;
+                writeExchangeRate(out, obj);
                 return;
             }
         }
@@ -121,6 +129,7 @@ final class Ser implements Externalizable {
      * @param in  the input stream
      * @throws IOException if an error occurs
      */
+    @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         type = in.readByte();
         switch (type) {
@@ -134,6 +143,10 @@ final class Ser implements Externalizable {
             }
             case CURRENCY_UNIT: {
                 object = readCurrency(in);
+                return;
+            }
+            case EXCHANGE_RATE: {
+                object = readExchangeRate(in);
                 return;
             }
         }
@@ -178,7 +191,7 @@ final class Ser implements Externalizable {
 
     /**
      * Returns the object that will replace this one.
-     * 
+     *
      * @return the read object, should never be null
      */
     private Object readResolve() {
