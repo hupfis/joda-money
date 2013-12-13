@@ -105,6 +105,16 @@ final class Ser implements Externalizable {
         out.writeShort(obj.getDefaultFractionDigits());
     }
 
+    private void writeExchangeRate(ObjectOutput out, ExchangeRate obj) throws IOException {
+        writeCurrency(out, obj.getCounter());
+        writeCurrency(out, obj.getBase());
+        // write BigDecimal representing the conversion rate
+        byte[] bytes = obj.getRate().unscaledValue().toByteArray();
+        out.writeInt(bytes.length);
+        out.write(bytes);
+        out.writeInt(obj.getRate().scale());
+    }
+
     /**
      * Outputs the data.
      *
@@ -149,6 +159,21 @@ final class Ser implements Externalizable {
             throw new InvalidObjectException("Deserialization found a mismatch in the decimal places for currency " + code);
         }
         return singletonCurrency;
+    }
+
+    private ExchangeRate readExchangeRate(ObjectInput in) throws IOException {
+        CurrencyUnit source = readCurrency(in);
+        CurrencyUnit target = readCurrency(in);
+        byte[] bytes = new byte[in.readInt()];
+        in.readFully(bytes);
+        BigDecimal rate = new BigDecimal(new BigInteger(bytes), in.readInt());
+        try {
+            return new ExchangeRate(target, source, rate);
+        } catch (RuntimeException e) {
+            throw new InvalidObjectException(
+                    "Deserialization was not possible, the serialized form of the object may have been tampered with, cause: "
+                            + e.getMessage());
+        }
     }
 
     /**

@@ -53,6 +53,9 @@
       <action dev="scolebourne" type="fix">
         Change LBP currency to 2dp [7]
       </action>              
+      <action dev="scolebourne" type="fix">
+        Add exchange rate handling
+      </action>              
       <action dev="scolebourne" type="update">
         Relax checking for decimal places
       </action>              
